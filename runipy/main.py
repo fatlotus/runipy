@@ -1,4 +1,3 @@
-
 from __future__ import print_function
 
 import argparse
@@ -53,12 +52,10 @@ def main():
 
     exit_status = 0
     try:
-        nb_runner.run_notebook(skip_exceptions=args.skip_exceptions)
+        nb_runner.run_notebook(skip_exceptions=args.skip_exceptions,
+          autosave = args.output_file)
     except NotebookError:
         exit_status = 1
-
-    if args.output_file:
-        nb_runner.save_notebook(args.output_file)
 
     if args.html is not False:
         if args.html is None:
