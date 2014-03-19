@@ -63,7 +63,7 @@ class NotebookRunner(object):
         self.kc.stop_channels()
         self.km.shutdown_kernel(now=True)
 
-    def run_cell(self, cell):
+    def run_cell(self, cell, autosave):
         '''
         Run a notebook cell and update the output of that cell in-place.
         '''
@@ -76,7 +76,7 @@ class NotebookRunner(object):
         else:
             logging.info('Cell returned')
 
-        outs = list()
+        cell['outputs'] = []
         while True:
             try:
                 msg = self.iopub.get_msg(timeout=1)
@@ -120,8 +120,10 @@ class NotebookRunner(object):
                 #logging.error('\n'.join(content['traceback']))
             else:
                 raise NotImplementedError('unhandled iopub message: %s' % msg_type)
-            outs.append(out)
-        cell['outputs'] = outs
+            
+            cell['outputs'].append(out)
+            if autosave:
+                self.save_notebook(autosave)
 
         if status == 'error':
             raise NotebookError()
@@ -136,7 +138,7 @@ class NotebookRunner(object):
                     yield cell
 
 
-    def run_notebook(self, skip_exceptions=False):
+    def run_notebook(self, skip_exceptions=False, autosave=None):
         '''
         Run all the cells of a notebook in order and update
         the outputs in-place.
@@ -146,10 +148,12 @@ class NotebookRunner(object):
         '''
         for cell in self.iter_code_cells():
             try:
-                self.run_cell(cell)
+                self.run_cell(cell, autosave = autosave)
             except NotebookError:
                 if not skip_exceptions:
                     raise
+            if autosave is not None:
+                self.save_notebook(autosave)
 
     def save_notebook(self, nb_out):
         logging.info('Saving to %s', nb_out)
