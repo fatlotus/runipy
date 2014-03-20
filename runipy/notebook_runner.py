@@ -147,6 +147,9 @@ class NotebookRunner(object):
         subsequent cells are run (by default, the notebook execution stops).
         '''
         for cell in self.iter_code_cells():
+            cell['outputs'] = []
+        
+        for cell in self.iter_code_cells():
             try:
                 self.run_cell(cell, autosave = autosave)
             except NotebookError:
