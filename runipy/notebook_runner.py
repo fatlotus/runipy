@@ -69,12 +69,6 @@ class NotebookRunner(object):
         '''
         logging.info('Running cell:\n%s\n', cell.input)
         self.shell.execute(cell.input)
-        reply = self.shell.get_msg()
-        status = reply['content']['status']
-        if status == 'error':
-            logging.info('Cell raised uncaught exception: \n%s', '\n'.join(reply['content']['traceback']))
-        else:
-            logging.info('Cell returned')
 
         cell['outputs'] = []
         while True:
@@ -84,9 +78,7 @@ class NotebookRunner(object):
                     if msg['content']['execution_state'] == 'idle':
                         break
             except Empty:
-                # execution state should return to idle before the queue becomes empty,
-                # if it doesn't, something bad has happened
-                raise
+                pass
 
             content = msg['content']
             msg_type = msg['msg_type']
@@ -125,8 +117,13 @@ class NotebookRunner(object):
             if autosave:
                 self.save_notebook(autosave)
 
+        reply = self.shell.get_msg()
+        status = reply['content']['status']
         if status == 'error':
+            logging.info('Cell raised uncaught exception: \n%s', '\n'.join(reply['content']['traceback']))
             raise NotebookError()
+        else:
+            logging.info('Cell returned')
 
     def iter_code_cells(self):
         '''
