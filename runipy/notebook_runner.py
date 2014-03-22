@@ -145,6 +145,11 @@ class NotebookRunner(object):
         '''
         for cell in self.iter_code_cells():
             cell['outputs'] = []
+            if 'prompt_number' in cell:
+                del cell['prompt_number']
+        
+        if autosave is not None:
+            self.save_notebook(autosave)
         
         for cell in self.iter_code_cells():
             try:
