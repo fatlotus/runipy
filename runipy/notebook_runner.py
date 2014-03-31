@@ -33,7 +33,7 @@ class NotebookRunner(object):
         'application/javascript': 'html',
     }
 
-    def __init__(self, nb_in, pylab=False, mpl_inline=False):
+    def __init__(self):
         self.km = InProcessKernelManager()
         self.km.start_kernel()
 
@@ -51,9 +51,6 @@ class NotebookRunner(object):
         self.shell = self.kc.shell_channel
         self.iopub = self.kc.iopub_channel
         self.kc.kernel.shell.enable_matplotlib('inline')
-
-        logging.info('Reading notebook %s', nb_in)
-        self.nb = read(open(nb_in), 'json')
 
     def __del__(self):
         self.kc.stop_channels()
@@ -131,7 +128,7 @@ class NotebookRunner(object):
                     yield cell
 
 
-    def run_notebook(self, skip_exceptions=False, autosave=None):
+    def run_notebook(self, nb_in, skip_exceptions=False, autosave=None):
         '''
         Run all the cells of a notebook in order and update
         the outputs in-place.
@@ -139,6 +136,8 @@ class NotebookRunner(object):
         If ``skip_exceptions`` is set, then if exceptions occur in a cell, the
         subsequent cells are run (by default, the notebook execution stops).
         '''
+        self.nb = read(open(nb_in), 'json')
+        
         for cell in self.iter_code_cells():
             cell['outputs'] = []
             if 'prompt_number' in cell:
