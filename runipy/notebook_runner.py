@@ -57,7 +57,7 @@ class NotebookRunner(object):
 
     def __del__(self):
         self.kc.stop_channels()
-        self.km.shutdown_kernel(now=True)
+        self.km.shutdown_kernel()
 
     def run_cell(self, cell, autosave):
         '''
