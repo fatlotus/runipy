@@ -50,7 +50,7 @@ class NotebookRunner(object):
 
         self.shell = self.kc.shell_channel
         self.iopub = self.kc.iopub_channel
-        self.shell.enable_matplotlib("inline")
+        self.kc.kernel.shell.enable_matplotlib('inline')
 
         logging.info('Reading notebook %s', nb_in)
         self.nb = read(open(nb_in), 'json')
