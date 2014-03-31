@@ -12,7 +12,7 @@ from time import sleep
 import logging
 
 from IPython.nbformat.current import read, write, NotebookNode
-from IPython.kernel import KernelManager
+from IPython.kernel.inprocess.manager import InProcessKernelManager
 
 
 class NotebookError(Exception):
@@ -34,13 +34,8 @@ class NotebookRunner(object):
     }
 
     def __init__(self, nb_in, pylab=False, mpl_inline=False):
-        self.km = KernelManager()
-        if pylab:
-            self.km.start_kernel(extra_arguments=['--pylab=inline'])
-        elif mpl_inline:
-            self.km.start_kernel(extra_arguments=['--matplotlib=inline'])
-        else:
-            self.km.start_kernel()
+        self.km = InProcessKernelManager()
+        self.km.start_kernel()
 
         if platform.system() == 'Darwin':
             # There is sometimes a race condition where the first
@@ -55,6 +50,7 @@ class NotebookRunner(object):
 
         self.shell = self.kc.shell_channel
         self.iopub = self.kc.iopub_channel
+        self.shell.enable_matplotlib("inline")
 
         logging.info('Reading notebook %s', nb_in)
         self.nb = read(open(nb_in), 'json')
