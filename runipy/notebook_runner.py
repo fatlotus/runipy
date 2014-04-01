@@ -51,9 +51,15 @@ class NotebookRunner(object):
         self.shell = self.kc.shell_channel
         self.iopub = self.kc.iopub_channel
         self.kc.kernel.shell.enable_matplotlib('inline')
-        
+
         self.shell.execute("%matplotlib inline")
-        self.shell.get_msg()
+        print("Result: {!r}".format(self.shell.get_msg()))
+
+        try:
+            while True:
+                msg = self.iopub.get_msg(timeout=0)
+        except Empty:
+            pass
 
     def __del__(self):
         self.kc.stop_channels()
