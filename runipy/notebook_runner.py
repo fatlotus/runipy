@@ -52,7 +52,14 @@ class NotebookRunner(object):
         self.iopub = self.kc.iopub_channel
         self.kc.kernel.shell.enable_matplotlib('inline')
 
-        self.shell.execute("%matplotlib inline")
+        self.shell.execute(
+            "%matplotlib inline\n"
+            "from matplotlib import pyplot as plt\n"
+            "x = range(10)\n"
+            "y = range(20, 30)\n"
+            "plt.plot(x, y)\n"
+            "plt.show()"
+        )
         print("Result: {!r}".format(self.shell.get_msg()))
 
         try:
@@ -88,8 +95,8 @@ class NotebookRunner(object):
             out = NotebookNode(output_type=msg_type)
 
             if 'execution_count' in content:
-                cell['prompt_number'] = content['execution_count']
-                out.prompt_number = content['execution_count']
+                cell['prompt_number'] = content['execution_count'] - 1
+                out.prompt_number = content['execution_count'] - 1
 
             if msg_type in ['status', 'pyin']:
                 continue
