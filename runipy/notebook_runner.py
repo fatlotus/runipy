@@ -55,6 +55,7 @@ class NotebookRunner(object):
         self.shell.execute(
             "%matplotlib inline\n"
             "from matplotlib import pyplot as plt\n"
+            "plt.figure()\n"
             "x = range(10)\n"
             "y = range(20, 30)\n"
             "plt.plot(x, y)\n"
