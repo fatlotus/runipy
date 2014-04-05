@@ -14,6 +14,27 @@ import logging
 from IPython.nbformat.current import read, write, NotebookNode
 from IPython.kernel.inprocess.manager import InProcessKernelManager
 
+WARMUP = """
+import matplotlib.pyplot as plt
+import numpy as np
+years = np.array(range(10));
+sen_avg_len = np.array(range(20,30));
+
+# linear regression 
+A = np.vstack([years, np.ones(len(years))]).T
+w1 = np.linalg.solve(np.dot(A.T, A), np.dot(A.T, sen_avg_len) )
+  # for mean sentence length of that year
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.scatter(years, sen_avg_len, s=20, color='tomato')
+line = w1[0] * years + w1[1]
+plt.plot(years, line)
+plt.xlabel('year', fontsize = 14)
+plt.ylabel('avg sentence length',  fontsize = 14)
+fig.show()
+"""
+
 
 class NotebookError(Exception):
     pass
@@ -52,20 +73,13 @@ class NotebookRunner(object):
         self.iopub = self.kc.iopub_channel
         self.kc.kernel.shell.enable_matplotlib('inline')
 
-        self.shell.execute(
-            "%matplotlib inline\n"
-            "from matplotlib import pyplot as plt\n"
-            "plt.figure()\n"
-            "x = range(10)\n"
-            "y = range(20, 30)\n"
-            "plt.plot(x, y)\n"
-            "plt.show()"
-        )
+        self.shell.execute(WARMUP)
         print("Result: {!r}".format(self.shell.get_msg()))
 
         try:
             while True:
                 msg = self.iopub.get_msg(timeout=0)
+                print("iopub Message: {!r}".format(msg))
         except Empty:
             pass
 
